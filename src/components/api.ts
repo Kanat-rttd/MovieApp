@@ -42,4 +42,45 @@ export const fetchMediaDetails = async (media_type: "movie" | "tv", id: string, 
   });
 
   return res.data;
+};
+
+export const fetchRandomMedia = async (media_type: "movie" | "tv", id: number, cancelToken: any) => {
+  const res = await api.get(`/${media_type}/${id}`, {
+    cancelToken
+  });
+
+  return res.data;
+};
+
+export const fetchMovieGenres = async (cancelToken: any) => {
+  const res = await api.get(`/genre/movie/list`, {
+    cancelToken,
+  });
+
+  return res.data;
+};
+
+export const fetchSerieGenres = async (cancelToken: any) => {
+  const res = await api.get(`/genre/tv/list`, {
+    cancelToken,
+  });
+
+  return res.data;
+};
+
+export const fetchMediaWithGenres = async (media_type: "movie" | "tv", genreIds: number[], page: number = 1, cancelToken: any, min_rating: string | null) => {
+  const genreString = genreIds.join("|");
+
+  const res = await api.get(`/discover/${media_type}`, {
+    params: {
+      with_genres: genreString,
+      sort_by: "popularity.desc",
+      "vote_average.gte": min_rating === null ? 1 : Number(min_rating),
+      "vote_count.gte": 100,
+      page,
+    },
+    cancelToken
+  });
+
+  return res.data;
 }

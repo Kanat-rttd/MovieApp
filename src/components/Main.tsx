@@ -9,7 +9,7 @@ type MoviesPropsType = {
   allMedia: MoviesType[],
   setAllMedia: React.Dispatch<React.SetStateAction<MoviesType[]>>
   isLoading: boolean
-  getData: () => void
+  getData: () => (nextPage?: number, append?: boolean) => void
 }
 
 export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) {
@@ -49,7 +49,7 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
 
   return (
     <div>
-      <div className="rounded-lg flex flex-wrap justify-center content-center mt-24 pt-4 mb-10">
+      <div className="rounded-lg flex flex-wrap justify-center content-center mt-28 pt-4 mb-10">
         {allMedia.map((media) => (
           <div
             key={media.id}

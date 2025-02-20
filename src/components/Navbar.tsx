@@ -1,11 +1,16 @@
 import { NavLink } from "react-router-dom";
-import { FaBookmark, FaDice, FaInfoCircle, FaSearch } from "react-icons/fa";
+import { FaBookmark, FaDice, FaSearch } from "react-icons/fa";
 import logo2 from "../assets/logo2.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Filter from "./Filter";
 
-export default function Navbar() {
-  const [input, setInput] = useState("");
+type NavbarProps = {
+  setFilters: React.Dispatch<React.SetStateAction<{ genres: {movie: number[], tv: number[]}, min_rating: string | null }>>;
+};
+
+export default function Navbar({setFilters}: NavbarProps) {
+  const [input, setInput] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -29,9 +34,9 @@ export default function Navbar() {
 
         <NavLink
           className={({ isActive }) =>
-            isActive 
-          ? "relative group transition duration-300 ease-in-out hover:text-red-500 text-red-500 font-bold" 
-          : "relative group transition duration-300 ease-in-out hover:text-red-500 text-white"
+            isActive
+              ? "relative group transition duration-300 ease-in-out hover:text-red-500 text-red-500 font-bold"
+              : "relative group transition duration-300 ease-in-out hover:text-red-500 text-white"
           }
           to="/favorites">
           <div className="flex items-center ">
@@ -43,23 +48,9 @@ export default function Navbar() {
 
         <NavLink
           className={({ isActive }) =>
-            isActive 
-          ? "relative group transition duration-300 ease-in-out hover:text-red-500 text-red-500 font-bold" 
-          : "relative group transition duration-300 ease-in-out hover:text-red-500 text-white"
-          }
-          to="/about-us">
-          <div className="flex items-center ">
-            <FaInfoCircle className="mr-1" />
-            О нас
-          </div>
-          <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-red-400 transition-all duration-300 group-hover:w-full"></span>
-        </NavLink>
-
-        <NavLink
-          className={({ isActive }) =>
-            isActive 
-          ? "relative group transition duration-300 ease-in-out hover:text-red-500 text-red-500 font-bold" 
-          : "relative group transition duration-300 ease-in-out hover:text-red-500 text-white"
+            isActive
+              ? "relative group transition duration-300 ease-in-out hover:text-red-500 text-red-500 font-bold"
+              : "relative group transition duration-300 ease-in-out hover:text-red-500 text-white"
           }
           to="/random">
           <div className="flex items-center ">
@@ -82,6 +73,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      <Filter setFilters={setFilters} />
     </div>
   )
 }

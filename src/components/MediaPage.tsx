@@ -33,7 +33,7 @@ export default function FilmPage() {
 
   return (
     <div
-      className="relative mt-24 min-h-screen bg-cover bg-center text-white"
+      className="relative mt-24 pt-0 min-h-screen bg-cover bg-center text-white"
       style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w1280${media.backdrop_path})` }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-60"></div>
