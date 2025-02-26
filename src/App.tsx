@@ -4,7 +4,6 @@ import './App.css'
 import Navbar from './components/Navbar';
 import Main from './components/Main';
 import Favorites from './components/Favorites';
-import AboutUs from './components/AboutUs';
 import MediaPage from './components/MediaPage';
 import { MoviesType } from './types/MoviesType';
 import Random from './components/Random';
@@ -14,25 +13,24 @@ import { fetchMediaWithGenres, fetchMovies, fetchSeries } from './components/api
 import { FavoritesProvider } from './context/FavoritesContext';
 
 type FiltersTypes = {
+  media_types: string[],
   genres: {
     movie: number[]
     tv: number[]
   },
-  min_rating: string | null
+  min_rating: string | null,
+  isAnime: boolean,
 };
 
 function App() {
   const [allMedia, setAllMedia] = useState<MoviesType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // const [selectedGenres, setSelectedGenres] = useState<{ movie: number[], tv: number[] }>({
-  //   movie: [],
-  //   tv: [],
-  // });
-
   const [filters, setFilters] = useState<FiltersTypes>({
-    genres: {movie: [], tv: []},
+    media_types: [],
+    genres: { movie: [], tv: [] },
     min_rating: null,
+    isAnime: false,
   })
 
   const [page, setPage] = useState<number>(1);
@@ -41,28 +39,33 @@ function App() {
     setIsLoading(true);
     const cancelToken = axios.CancelToken.source();
 
-    if (filters.genres.movie.length > 0 || filters.genres.tv.length > 0) {
-      Promise.all([
-        filters.genres.movie.length > 0 
-        ? fetchMediaWithGenres("movie", filters.genres.movie, nextPage, cancelToken.token, filters.min_rating) 
-        : Promise.resolve({ results: [] }),
+    const { media_types, genres, min_rating } = filters;
 
-        filters.genres.tv.length > 0 
-        ? fetchMediaWithGenres("tv", filters.genres.tv, nextPage, cancelToken.token, filters.min_rating) 
-        : Promise.resolve({ results: [] }),
-      ])
-        .then(([movies, series]) => {
-          const filteredMovies = movies.results.map((movie: MoviesType) => ({ ...movie, media_type: "movie" }));
-          const filteredSeries = series.results.map((serie: MoviesType) => ({ ...serie, media_type: "tv" }));
+    // Если выбраны фильтры (media_types не пустой)
+    if (media_types.length > 0) {
+      const promises = media_types.map((type) =>
+        fetchMediaWithGenres(
+          type as "movie" | "tv",
+          genres[type as "movie" | "tv"] || [],
+          nextPage,
+          cancelToken.token,
+          filters.isAnime,
+          min_rating,
+        )
+      );
 
-          const newData = [...filteredMovies, ...filteredSeries];
-
-          console.log(newData)
-
+      Promise.all(promises)
+        .then((results) => {
+          const newData = results.flatMap((result, index) =>
+            result.results.map((item: MoviesType) => ({
+              ...item,
+              media_type: media_types[index],
+            }))
+          );
           setAllMedia((prev) => (append ? [...prev, ...newData] : newData));
-          setPage(nextPage)
+          setPage(nextPage);
         })
-        .catch(error => {
+        .catch((error) => {
           if (axios.isCancel(error)) console.log("Запрос отменён");
           else console.error("Ошибка загрузки", error);
         })
@@ -101,16 +104,15 @@ function App() {
     return () => {
       console.log("Компонент размонтирован")
     }
-  }, [filters.genres]);
+  }, [filters]);
 
   return (
     <FavoritesProvider>
       <BrowserRouter>
         <Navbar setFilters={setFilters} />
         <Routes>
-          <Route path='/' element={<Main allMedia={allMedia} setAllMedia={setAllMedia} isLoading={isLoading} getData={() => getData(page+1, true)} />}></Route>
+          <Route path='/' element={<Main allMedia={allMedia} setAllMedia={setAllMedia} isLoading={isLoading} getData={() => getData(page + 1, true)} />}></Route>
           <Route path='/favorites' element={<Favorites />}></Route>
-          <Route path='/about-us' element={<AboutUs />}></Route>
           <Route path='/random' element={<Random />}></Route>
           <Route path='/media/:media_type/:id/:title' element={<MediaPage />}></Route>
           <Route path='/search' element={<SearchPage />}></Route>

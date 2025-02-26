@@ -16,7 +16,14 @@ export type MoviesType = {
   spoken_languages: SpokenLanguages[]
   genres: Genres[]
   seasons: Seasons[]
-}
+};
+
+export type VideosType = {
+  key: string
+  type: string
+  site: string
+  name: string
+};
 
 type ProductionCompanies = {
   id: number

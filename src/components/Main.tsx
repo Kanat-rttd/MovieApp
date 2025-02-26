@@ -21,7 +21,7 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
     throw new Error("Favorites context error null")
   };
 
-  const { setMedias, isFavorite } = favoritesContext;
+  const { setMedias, isFavorite, removeFromFavorites } = favoritesContext;
 
   const getAnotherData = () => {
     getData()
@@ -72,8 +72,13 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
                   }}
                   className="absolute right-8 top-6 cursor-pointer transform transition-all duration-300 hover:scale-125 hover:shadow-lg"
                   onClick={() => {
-                    setMedias((prev: MoviesType[]) => [...prev, media]);
-                    console.log("Сохраненные: ", media.title ?? media.name)
+                    if (isFavorite(media.id)) {
+                      removeFromFavorites(media.id);
+                      console.log("Удалено из сохраненных", media.title ?? media.name);
+                    } else {
+                      setMedias((prev: MoviesType[]) => [...prev, media])
+                      console.log("Добавлено в сохраненные: ", media.title ?? media.name)
+                    }
                   }}
                 />
                 <Link

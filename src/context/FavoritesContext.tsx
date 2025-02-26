@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { MoviesType } from "../types/MoviesType";
 
 type FavoritesContextType = {
@@ -15,7 +15,14 @@ type FavoritesChildrenProviderProps = {
 export const FavoritesContext = createContext<FavoritesContextType | null>(null);
 
 export function FavoritesProvider({children}: FavoritesChildrenProviderProps) {
-  const [medias, setMedias] = useState<MoviesType[]>([]);
+  const [medias, setMedias] = useState<MoviesType[]>(() => {
+    const savedFavorites = localStorage.getItem("favorites");
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(medias));
+  }, [medias])
 
   const isFavorite = (mediaID: number) => {
     return medias.some((media) => media.id === mediaID);

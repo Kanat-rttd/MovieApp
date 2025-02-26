@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Filter from "./Filter";
 
 type NavbarProps = {
-  setFilters: React.Dispatch<React.SetStateAction<{ genres: {movie: number[], tv: number[]}, min_rating: string | null }>>;
+  setFilters: React.Dispatch<React.SetStateAction<{ media_types: string[], genres: {movie: number[], tv: number[]}, min_rating: string | null, isAnime: boolean }>>;
 };
 
 export default function Navbar({setFilters}: NavbarProps) {

@@ -1,15 +1,25 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { MoviesType } from "../types/MoviesType";
 import empty from '../assets/empty1.png';
 import axios from "axios";
 import { searchMulti } from "./api";
+import { FaHeart } from "react-icons/fa";
+import { FavoritesContext } from "../context/FavoritesContext";
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const [movies, setMovies] = useState<MoviesType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const movieName: string | null = searchParams.get("q"); //получаем название которое ввел пользователь из строки url
+
+  const favoritesContext = useContext(FavoritesContext);
+
+  if (!favoritesContext) {
+    throw new Error("Favorites context error null")
+  };
+
+  const { setMedias, isFavorite, removeFromFavorites } = favoritesContext;
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
@@ -28,24 +38,45 @@ export default function SearchPage() {
   }, [movieName]);
 
   return (
-    <div className="mt-24 p-4">
+    <div className="mt-28 p-4">
       {movies.length > 0 ? (
         <div className="grid grid-cols-4 gap-4">
           {movies.map((movie) => (
-            <Link
-              key={movie.id}
-              to={`/media/${movie.media_type}/${movie.id}/${encodeURIComponent(movie.title ?? movie.name)}`}
-            >
+            <div>
               <div className="relative bg-gray-800 text-white p-4 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                 <div className="absolute top-2 left-2 px-3 py-1 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
                   <h3 className="text-white text-sm font-bold">
                     {movie.media_type === "movie" ? "Фильм" : "Сериал"}
                   </h3>
                 </div>
-                <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} className="rounded-lg mb-2" />
+                <div>
+                  <FaHeart
+                    size={32}
+                    style={{
+                      fill: isFavorite(movie.id) ? "red" : "white",
+                      stroke: "black",
+                      strokeWidth: "15px",
+                    }}
+                    className="absolute right-8 top-6 cursor-pointer transform transition-all duration-300 hover:scale-125 hover:shadow-lg"
+                    onClick={() => {
+                      if (isFavorite(movie.id)) {
+                        removeFromFavorites(movie.id);
+                        console.log("Удалено из сохраненных", movie.title ?? movie.name);
+                      } else {
+                        setMedias((prev: MoviesType[]) => [...prev, movie])
+                        console.log("Добавлено в сохраненные: ", movie.title ?? movie.name)
+                      }
+                    }}
+                  />
+                  <Link
+                    to={`/media/${movie.media_type}/${movie.id}/${encodeURIComponent(movie.title ?? movie.name)}`}
+                  >
+                    <img src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} className="rounded-lg mb-2" />
+                  </Link>
+                </div>
                 <h2 className="text-lg">{movie.title ?? movie.name}</h2>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       ) : (

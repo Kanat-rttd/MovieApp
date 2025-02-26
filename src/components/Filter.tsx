@@ -6,7 +6,13 @@ import { FaChevronDown, FaChevronUp, } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 
 type FilterPropsType = {
-  setFilters: React.Dispatch<React.SetStateAction<{ genres: {movie: number[], tv: number[]}, min_rating: string | null }>>;
+  setFilters: React.Dispatch<React.SetStateAction<
+    {
+      media_types: string[],
+      genres: { movie: number[], tv: number[] },
+      min_rating: string | null,
+      isAnime: boolean,
+    }>>;
 }
 
 export default function Filter({ setFilters }: FilterPropsType) {
@@ -22,7 +28,8 @@ export default function Filter({ setFilters }: FilterPropsType) {
   const [serieGenresToFetch, setSerieGenresToFetch] = useState<number[]>([]);
 
   const [selectedRating, setSelectedRating] = useState<string>("1");
-  // const [hasRatingChanged, setHasRatingChanged] = useState<boolean>(false);
+
+  const [isAnime, setIsAnime] = useState<boolean>(false);
 
   const location = useLocation();
 
@@ -88,18 +95,36 @@ export default function Filter({ setFilters }: FilterPropsType) {
   }, []);
 
   const handleApply = () => {
+    const hasMovieFilters = isActiveMovie && (movieGenresToFetch.length > 0 || selectedRating !== "1");
+    const hasSerieFilters = isActiveSerie && (serieGenresToFetch.length > 0 || selectedRating !== "1");
+
+    const animeGenreId = 16;
+
+    // Определяем, для каких типов медиа выбраны фильтры
+    const mediaTypes = [];
+    if (hasMovieFilters) mediaTypes.push("movie");
+    if (hasSerieFilters) mediaTypes.push("tv");
+
     setFilters({
+      media_types: mediaTypes, // Новое поле
       genres: {
-        movie: isActiveMovie ? movieGenresToFetch : [],
-        tv: isActiveSerie ? serieGenresToFetch : [],
+        movie: isAnime ? [animeGenreId] : (hasMovieFilters ? movieGenresToFetch : []),
+        tv: isAnime ? [animeGenreId] : (hasSerieFilters ? serieGenresToFetch : []),
       },
-      min_rating: selectedRating,
+      min_rating: selectedRating === "1" ? null : selectedRating,
+      isAnime: isAnime
     });
 
     setMovieGenresToFetch([]);
     setSerieGenresToFetch([]);
-
     setIsActive(false);
+  };
+
+  const handleReset = () => {
+    setMovieGenresToFetch([]);
+    setSerieGenresToFetch([]);
+    setIsAnime(false);
+    setSelectedRating("1");
   };
 
   const showFilterArrow = location.pathname === '/';
@@ -119,12 +144,12 @@ export default function Filter({ setFilters }: FilterPropsType) {
             {/* Дивы с надписями и стрелками */}
             <div className="flex items-center justify-around">
               <div className="flex items-center">
-                <h2 className="text-xl mr-1">Фильмы</h2>
+                <h2 className="text-xl mr-1">{isActiveMovie ? <span className="text-red-500">Фильмы</span> : <span>Фильмы</span>}</h2>
                 {isActiveMovie ? (
                   <FaChevronUp
                     onClick={handleArrowUpMovie}
                     size={20}
-                    className="mt-1 text-black hover:text-red-500 transition-colors duration-300 cursor-pointer"
+                    className="mt-1 text-red-500 transition-colors duration-300 cursor-pointer"
                   />
                 ) : (
                   <FaChevronDown
@@ -136,12 +161,12 @@ export default function Filter({ setFilters }: FilterPropsType) {
               </div>
 
               <div className="flex items-center">
-                <h2 className="text-xl mr-1">Сериалы</h2>
+                <h2 className="text-xl mr-1">{isActiveSerie ? <span className="text-red-500">Сериалы</span> : <span>Сериалы</span>}</h2>
                 {isActiveSerie && (
                   <FaChevronUp
                     onClick={handleArrowUpSerie}
                     size={20}
-                    className="mt-1 text-black hover:text-red-500 transition-colors duration-300 cursor-pointer"
+                    className="mt-1 text-red-500 transition-colors duration-300 cursor-pointer"
                   />
                 )}
                 {!isActiveSerie && (
@@ -166,6 +191,7 @@ export default function Filter({ setFilters }: FilterPropsType) {
                           <input
                             id={`genre-${genre.id}`}
                             type="checkbox"
+                            checked={movieGenresToFetch.includes(genre.id)}
                             className="cursor-pointer accent-red-500 h-4 w-4"
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -196,13 +222,24 @@ export default function Filter({ setFilters }: FilterPropsType) {
                           onChange={handleRatingChange}
                           className="text-black p-1 rounded-lg"
                         >
-                         <option value="" disabled>Выберите рейтинг</option> 
-                         {Array.from({length: 9}, (_, i) => i + 1).map(rating => (
-                          <option key={rating} value={rating}>
-                            {rating}
-                          </option>
-                         ))}
+                          <option value="" disabled>Выберите рейтинг</option>
+                          {Array.from({ length: 9 }, (_, i) => i + 1).map(rating => (
+                            <option key={rating} value={rating}>
+                              {rating}
+                            </option>
+                          ))}
                         </select>
+                      </div>
+
+                      <div>
+                        <input
+                          type="checkbox"
+                          id="anime-filter"
+                          checked={isAnime}
+                          onChange={(e) => setIsAnime(e.target.checked)}
+                          className="cursor-pointer accent-red-500 h-4 w-4"
+                        />
+                        <label htmlFor="anime-filter" className="ml-2">Только аниме</label>
                       </div>
 
                       <button
@@ -211,7 +248,7 @@ export default function Filter({ setFilters }: FilterPropsType) {
                       >
                         Применить
                       </button>
-                      <button className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded-lg font-semibold tracking-wide shadow-md transition duration-300">
+                      <button onClick={handleReset} className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded-lg font-semibold tracking-wide shadow-md transition duration-300">
                         Сбросить
                       </button>
                     </div>
@@ -231,6 +268,7 @@ export default function Filter({ setFilters }: FilterPropsType) {
                           <input
                             id={`genre-${genre.id}`}
                             type="checkbox"
+                            checked={serieGenresToFetch.includes(genre.id)}
                             className="cursor-pointer accent-red-500 h-4 w-4"
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -251,14 +289,43 @@ export default function Filter({ setFilters }: FilterPropsType) {
                       ))}
                     </div>
 
-                    <div className="flex justify-center gap-6 mt-5">
+                    <div className="flex justify-center items-center gap-6 mt-5">
+                      <div>
+                        <label htmlFor="rating-select" className="mr-2">Минимальная оценка</label>
+                        <select
+                          name="rating"
+                          id="rating"
+                          value={selectedRating}
+                          onChange={handleRatingChange}
+                          className="text-black p-1 rounded-lg"
+                        >
+                          <option value="" disabled>Выберите рейтинг</option>
+                          {Array.from({ length: 9 }, (_, i) => i + 1).map(rating => (
+                            <option key={rating} value={rating}>
+                              {rating}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <input
+                          type="checkbox"
+                          id="anime-filter"
+                          checked={isAnime}
+                          onChange={(e) => setIsAnime(e.target.checked)}
+                          className="cursor-pointer accent-red-500 h-4 w-4"
+                        />
+                        <label htmlFor="anime-filter" className="ml-2">Только аниме</label>
+                      </div>
+
                       <button
                         onClick={handleApply}
                         className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg font-semibold tracking-wide shadow-md transition duration-300"
                       >
                         Применить
                       </button>
-                      <button className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded-lg font-semibold tracking-wide shadow-md transition duration-300">
+                      <button onClick={handleReset} className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2 rounded-lg font-semibold tracking-wide shadow-md transition duration-300">
                         Сбросить
                       </button>
                     </div>
