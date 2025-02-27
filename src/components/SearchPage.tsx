@@ -40,9 +40,9 @@ export default function SearchPage() {
   return (
     <div className="mt-28 p-4">
       {movies.length > 0 ? (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {movies.map((movie) => (
-            <div>
+            <div key={movie.id}>
               <div className="relative bg-gray-800 text-white p-4 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                 <div className="absolute top-2 left-2 px-3 py-1 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
                   <h3 className="text-white text-sm font-bold">

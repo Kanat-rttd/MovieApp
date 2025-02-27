@@ -212,8 +212,8 @@ export default function Filter({ setFilters }: FilterPropsType) {
                       ))}
                     </div>
 
-                    <div className="flex items-center justify-center gap-6 mt-5">
-                      <div>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-5">
+                      <div className="flex flex-col md:block">
                         <label htmlFor="rating-select" className="mr-2">Минимальная оценка</label>
                         <select
                           name="rating"
@@ -289,8 +289,8 @@ export default function Filter({ setFilters }: FilterPropsType) {
                       ))}
                     </div>
 
-                    <div className="flex justify-center items-center gap-6 mt-5">
-                      <div>
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-5">
+                      <div className="flex flex-col md:block">
                         <label htmlFor="rating-select" className="mr-2">Минимальная оценка</label>
                         <select
                           name="rating"

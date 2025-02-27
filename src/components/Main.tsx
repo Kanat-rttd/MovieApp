@@ -47,13 +47,18 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
     };
   }, [location.pathname]);
 
+  const itemsPerRow = 4; // 
+  const lastRowItems = allMedia.length % itemsPerRow;
+  const skeletonsToCompleteRow = lastRowItems === 0 ? 0 : itemsPerRow - lastRowItems;
+  const totalSkeletons = isLoading ? skeletonsToCompleteRow + itemsPerRow : 0;
+
   return (
     <div>
-      <div className="rounded-lg flex flex-wrap justify-center content-center mt-28 pt-4 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 mt-28 pt-4 mb-10 gap-4">
         {allMedia.map((media) => (
           <div
             key={media.id}
-            className="w-1/4 p-2 pb-4 flex flex-col items-center animate-fade-in"
+            className="p-2 pb-4 flex flex-col items-center animate-fade-in"
           >
             <div className="bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
               <div className="absolute top-2 left-2 px-3 py-1 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
@@ -85,7 +90,7 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
                   to={`/media/${media.media_type}/${media.id}/${encodeURIComponent(media.title ?? media.name)}`}
                 >
                   <img
-                    className="w-72 h-76 object-cover cursor-pointer rounded-t-lg"
+                    className="w-full h-76 object-cover cursor-pointer rounded-t-lg"
                     src={media.poster_path ? `https://image.tmdb.org/t/p/w500${media.poster_path}` : no_image}
                     alt={media.title ?? media.name}
                   />
@@ -93,7 +98,7 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
               </div>
 
               <div className="mt-3 max-w-56 flex flex-col items-start">
-                <span className="text-base font-bold text-transparent bg-clip-text text-white">{media.title ?? media.name}</span>
+                <span className="text-base font-bold text-transparent bg-clip-text text-white w-full">{media.title ?? media.name}</span>
                 <div className="flex items-center mt-2">
                   <span className="text-sm text-yellow-500">★ {Number(media.vote_average).toFixed(1)}</span>
                 </div>
@@ -104,14 +109,13 @@ export default function Main({ allMedia, isLoading, getData }: MoviesPropsType) 
 
         {/* Skeleton Loader при загрузке */}
         {isLoading &&
-          Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="w-1/4 p-2 pb-4 flex flex-col items-center">
-              <div className="bg-gray-300 w-72 h-76 animate-pulse rounded-lg"></div>
+          Array.from({ length: totalSkeletons }).map((_, index) => (
+            <div key={`skeleton-${index}`} className="p-2 pb-4 flex flex-col items-center">
+              <div className="bg-gray-300 w-full h-76 animate-pulse rounded-lg"></div>
               <div className="bg-gray-300 h-6 w-56 mt-2 animate-pulse rounded"></div>
               <div className="bg-gray-300 h-4 w-32 mt-1 animate-pulse rounded"></div>
             </div>
-          ))
-        }
+          ))}
       </div>
 
       {/* Кнопка "Загрузить еще" */}

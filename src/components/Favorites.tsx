@@ -22,7 +22,7 @@ export default function Favorites() {
             {medias.map((media) => (
               <div
                 key={media.id}
-                className="w-1/4 p-2 pb-4 flex flex-col items-center animate-fade-in"
+                className="p-2 pb-4 flex flex-col items-center animate-fade-in"
               >
                 <div className="bg-gray-800 p-4 rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                   <div className="absolute top-2 left-2 px-3 py-1 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
